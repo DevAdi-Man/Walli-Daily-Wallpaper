@@ -5,6 +5,8 @@ export const theme = {
 
     //neutral
     neutral: (opacity: number) => `rgba(10,10,10,${opacity})`,
+
+    grayBg: '#e5e8eb',
   },
   fontWeight: {
     medium: 500 as const,
