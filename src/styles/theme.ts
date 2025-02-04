@@ -1,15 +1,15 @@
 export const theme = {
   colors: {
     white: '#fff',
-    balck: '#ccc',
+    black: '#ccc',
 
     //neutral
-    neutral: (opacity:number)=> `rgba(10,10,10,${opacity})`,
+    neutral: (opacity: number) => `rgba(10,10,10,${opacity})`,
   },
   fontWeight: {
-    medium: '500',
-    semiBold: '600',
-    bold: '700',
+    medium: 500 as const,
+    semiBold: 600 as const,
+    bold: 700 as const,
   },
   radius: {
     xs: 10,
