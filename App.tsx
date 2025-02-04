@@ -4,11 +4,13 @@
  *
  * @format
  */
-
-import { NavigationContainer } from '@react-navigation/native';
+import 'react-native-reanimated';
+import './gesture-handler';
+import {NavigationContainer} from '@react-navigation/native';
 import React from 'react';
-import AuthStack from './src/navigation/AuthStack';
+import {AuthStack} from './src/navigation/AuthStack';
 import AppStack from './src/navigation/AppStack';
+import {StatusBar} from 'react-native';
 // import {
 //   useColorScheme,
 // } from 'react-native';
@@ -32,11 +34,10 @@ function App(): React.JSX.Element {
 
   return (
     <NavigationContainer>
+      <StatusBar barStyle="light-content" hidden />
       <AppNavigation />
     </NavigationContainer>
   );
 }
-
-
 
 export default App;
