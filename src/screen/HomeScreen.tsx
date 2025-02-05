@@ -1,40 +1,95 @@
-import { View, StyleSheet, Pressable, Text, ScrollView, TextInput } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  View,
+  StyleSheet,
+  Pressable,
+  Text,
+  ScrollView,
+  TextInput,
+} from 'react-native';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Feather from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { theme } from '../styles/theme';
-import { hp, wp } from '../helper/common';
+import {theme} from '../styles/theme';
+import {hp, wp} from '../helper/common';
 import Categories from '../components/categories';
-import { apiCall } from '../api';
+import {apiCall} from '../api';
 import ImagesGrid from '../components/ImagesGrid';
+import {debounce} from 'lodash';
 
-
+var page = 1;
 export default function HomeScreen() {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('');
   const [images, setImages] = useState<any[]>([]);
-  const { top } = useSafeAreaInsets();
+  const {top} = useSafeAreaInsets();
   const paddingTop = top > 0 ? top + 10 : 30;
-  const searchInputRef = useRef(null);
+  const searchInputRef = useRef<TextInput>(null);
 
-
-  useEffect(() => {
-    fetchImages();
-  });
-  const fetchImages = async(parma = {page:1},append = false) => {
-    const res = await apiCall(parma);
-    if (res.success && res?.data?.hits) {
-      if(append)
-        {setImages([...images,...res.data.hits]);}
-      else
-      {setImages([...res.data.hits]);}
-
-    }
-  };
   const handleChangeCategory = (cat: any) => {
     setActiveCategory(cat);
+    clearSearch();
+    setImages([]);
+    page = 1;
+    let param: { page: number; category?: string } = {
+      page,
+    };
+    if (cat) {
+      param.category = cat;
+    }
+    fetchImages(param, false);
+  };
+
+  const fetchImages = async (
+    parma: {page: number; q?: string} = {page: 1},
+    append = false,
+  ) => {
+    const res = await apiCall(parma);
+    if (res.success && res?.data?.hits) {
+      if (append) {
+        setImages([...images, ...res.data.hits]);
+      } else {
+        setImages([...res.data.hits]);
+      }
+    }
+  };
+  useEffect(() => {
+    fetchImages();
+  }, []);
+
+
+  const handleSearch = useCallback((text: any) => {
+    console.log('search for:', text);
+    setSearch(text); // Update search state to keep input controlled
+    if (text.length > 2) {
+      //search for this text
+      page = 1;
+      setImages([]);
+      setActiveCategory(''); // reset the category while searching
+      fetchImages({page, q: text});
+    }
+    if (text == '') {
+      //reset result
+      page = 1;
+      setImages([]);
+      setActiveCategory('');// reset the category while searching
+      searchInputRef?.current?.clear();
+      fetchImages({page});
+    }
+  }, []);
+
+  // Cleanup debounce function on unmount
+  const debouncedSearch = useRef(debounce(handleSearch, 400)).current;
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, []);
+
+  //clear search
+  const clearSearch = () => {
+    setSearch('');
   };
   console.log('Active catorgory : ', activeCategory);
   return (
@@ -65,12 +120,15 @@ export default function HomeScreen() {
           <TextInput
             value={search}
             ref={searchInputRef}
-            onChangeText={value => setSearch(value)}
+            onChangeText={text => {
+              setSearch(text); // Update search state instantly to prevent input from clearing
+              debouncedSearch(text); // Call debounced function
+            }}
             placeholder="search for photos.."
             style={styles.searchInput}
           />
           {search && (
-            <Pressable style={styles.closeIcons}>
+            <Pressable onPress={()=> handleSearch('')} style={styles.closeIcons}>
               <Ionicons
                 name="close"
                 size={24}
@@ -82,15 +140,14 @@ export default function HomeScreen() {
 
         {/* categories */}
         <View style={styles.categories}>
-          <Categories activeCategory={activeCategory} handleChangeCategory={handleChangeCategory} />
+          <Categories
+            activeCategory={activeCategory}
+            handleChangeCategory={handleChangeCategory}
+          />
         </View>
 
         {/* images masonary grid */}
-        <View>
-          {
-            images.length > 0 && <ImagesGrid images={images} />
-          }
-        </View>
+        <View>{images.length > 0 && <ImagesGrid images={images} />}</View>
       </ScrollView>
     </View>
   );

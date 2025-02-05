@@ -11,7 +11,7 @@ const formaltURL = (param:any) => {
     let value = key == 'q' ? encodeURIComponent(param[key]) : param[key];
     url += `&${key}=${value}`;
   });
-  console.log('final uri : ', url);
+  // console.log('final uri : ', url);
   return url;
 };
 
