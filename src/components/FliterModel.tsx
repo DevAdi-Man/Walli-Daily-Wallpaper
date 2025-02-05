@@ -5,6 +5,7 @@ import {BottomSheetBackdropProps} from '@gorhom/bottom-sheet';
 import {BlurView} from '@react-native-community/blur';
 import Animated, {
   Extrapolation,
+  FadeInDown,
   interpolate,
   useAnimatedStyle,
 } from 'react-native-reanimated';
@@ -53,13 +54,17 @@ const FliterModel: React.FC<FliterModelProps> = ({
       <BottomSheetView style={styles.contentContainer}>
         <View style={styles.content}>
           <Text style={styles.filterText}>Filter</Text>
-          {Object.keys(section).map(sectionName => {
+          {Object.keys(section).map((sectionName, index) => {
             const SectionComponent =
               section[sectionName as keyof typeof section];
             let sectionData = data.filters[sectionName];
             let title = captalize(sectionName);
             return (
-              <View key={sectionName}>
+              <Animated.View
+                entering={FadeInDown.delay(index * 100 + 100)
+                  .springify()
+                  .damping(11)}
+                key={sectionName}>
                 <SectionView
                   title={title}
                   content={SectionComponent({
@@ -69,11 +74,15 @@ const FliterModel: React.FC<FliterModelProps> = ({
                     filterName: sectionName,
                   })}
                 />
-              </View>
+              </Animated.View>
             );
           })}
           {/* actions */}
-          <View style={styles.buttons}>
+          <Animated.View
+            entering={FadeInDown.delay(500)
+              .springify()
+              .damping(11)}
+            style={styles.buttons}>
             <Pressable style={styles.resetButton} onPress={onReset}>
               <Text
                 style={[
@@ -84,15 +93,11 @@ const FliterModel: React.FC<FliterModelProps> = ({
               </Text>
             </Pressable>
             <Pressable style={styles.applyButton} onPress={onApply}>
-              <Text
-                style={[
-                  styles.buttonsText,
-                  {color: theme.colors.white},
-                ]}>
+              <Text style={[styles.buttonsText, {color: theme.colors.white}]}>
                 Apply
               </Text>
             </Pressable>
-          </View>
+          </Animated.View>
         </View>
       </BottomSheetView>
     </BottomSheetModal>

@@ -28,6 +28,8 @@ export default function HomeScreen() {
   const [images, setImages] = useState<any[]>([]);
   const {top} = useSafeAreaInsets();
   const [filters, setFilters] = useState<Record<string, any>>({});
+  const scrollRef = useRef(null);
+  const [isEndReached, setIsEndReached] = useState(false);
 
   const paddingTop = top > 0 ? top + 10 : 30;
   const searchInputRef = useRef<TextInput>(null);
@@ -50,7 +52,7 @@ export default function HomeScreen() {
 
   const fetchImages = async (
     parma: {page: number; q?: string} = {page: 1},
-    append = false,
+    append = true,
   ) => {
     const res = await apiCall(parma);
     if (res.success && res?.data?.hits) {
@@ -164,11 +166,48 @@ export default function HomeScreen() {
     }
     fetchImages(param, false);
   };
+  //handle scroll
+  const handleScroll = (event:any) => {
+    const contentHeight = event.nativeEvent.contentSize.height;
+    const scrollViewHeight = event.nativeEvent.layoutMeasurement.height;
+    const scrollOffset = event.nativeEvent.contentOffset.y;
+    const bottomPosition = contentHeight - scrollViewHeight;
+
+    if (scrollOffset > bottomPosition - 1) {
+      if (!isEndReached) {
+        setIsEndReached(true);
+        console.log('reached end of the scroll bar');
+        //fetch more images
+        ++page;
+        let param: {page: number; category?: string; q?: string} = {
+          page,
+          ...filters,
+        };
+        if (activeCategory) {
+          param.category = activeCategory;
+        }
+        if (search) {
+          param.q = search;
+        }
+      fetchImages(param, true);
+
+      }
+    } else if (isEndReached) {
+      setIsEndReached(false);
+    }
+  };
+  //handle scroll to top
+  const handleScrollToTop = () => {
+    scrollRef?.current?.scrollTo({
+      y: 0,
+      animated: true,
+    });
+  };
   return (
     <View style={[styles.container, {paddingTop}]}>
       {/* Header */}
       <View style={styles.headers}>
-        <Pressable>
+        <Pressable onPress={handleScrollToTop}>
           <Text style={styles.title}>Walli</Text>
         </Pressable>
         <Pressable onPress={openFilterModel}>
@@ -179,7 +218,11 @@ export default function HomeScreen() {
           />
         </Pressable>
       </View>
-      <ScrollView contentContainerStyle={styles.scrollableContainer}>
+      <ScrollView
+        onScroll={handleScroll}
+        scrollEventThrottle={5} //how often scroll event will fire whiel scrolling (in ms)
+        ref={scrollRef}
+        contentContainerStyle={styles.scrollableContainer}>
         {/* Search Screen */}
         <View style={styles.searchBar}>
           <View style={styles.searchIcons}>
