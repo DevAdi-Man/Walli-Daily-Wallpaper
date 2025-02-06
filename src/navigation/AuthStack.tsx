@@ -1,36 +1,58 @@
 import React from 'react';
+import {createStackNavigator} from '@react-navigation/stack';
+import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+
+// Import your screens
 import Welcome from '../screen/Welcome';
-import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from '../screen/HomeScreen';
-import {
-  BottomSheetModalProvider,
-} from '@gorhom/bottom-sheet';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-// import { StatusBar } from 'react-native';
+import ImagesScreen from '../screen/ImagesScreen';
+
+// Define Stack Types
 export type RootStackParamList = {
   Welcome: undefined;
   Home: undefined;
 };
-const Stack = createStackNavigator<RootStackParamList>();
+
+const MainStack = createStackNavigator<RootStackParamList>();
+const ModalStack = createStackNavigator();
+
+const MainStackScreen: React.FC = () => (
+  <MainStack.Navigator>
+    <MainStack.Screen
+      name="Welcome"
+      options={{headerShown: false}}
+      component={Welcome}
+    />
+    <MainStack.Screen
+      name="Home"
+      options={{headerShown: false}}
+      component={HomeScreen}
+    />
+  </MainStack.Navigator>
+);
 
 export const AuthStack: React.FC = () => {
   return (
-    <GestureHandlerRootView style={{flex:1}}>
+    <GestureHandlerRootView style={{flex: 1}}>
       <BottomSheetModalProvider>
-        <Stack.Navigator screenOptions={{headerShown: false}}>
-          <Stack.Screen
-            name="Welcome"
+        <ModalStack.Navigator
+          screenOptions={{
+            presentation: 'transparentModal',
+            cardStyle: {backgroundColor: 'transparent'},
+          }}>
+          <ModalStack.Screen
+            name="Main"
+            component={MainStackScreen}
             options={{headerShown: false}}
-            component={Welcome}
           />
-          <Stack.Screen
-            name="Home"
+          <ModalStack.Screen
+            name="ImagesScreen"
+            component={ImagesScreen}
             options={{headerShown: false}}
-            component={HomeScreen}
           />
-        </Stack.Navigator>
+        </ModalStack.Navigator>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
   );
 };
-

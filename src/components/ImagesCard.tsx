@@ -8,21 +8,35 @@ interface ImagesCardProps {
   item: any;
   index: number;
   columns: number;
+  navigation: any;
 }
 
-const ImagesCard: React.FC<ImagesCardProps> = ({ item, index, columns }) => {
-
+const ImagesCard: React.FC<ImagesCardProps> = ({
+  item,
+  index,
+  columns,
+  navigation,
+}) => {
   const isLastInRow = () => {
     return (index + 1) % columns === 0;
   };
 
   const getImageHeight = () => {
-    let { imageHeight: height, imageWidth: width } = item;
-    return { height: getImageSize(height, width) };
+    let {imageHeight: height, imageWidth: width} = item;
+    return {height: getImageSize(height, width)};
   };
+  // console.error("pressed")
   return (
-    <Pressable style={[styles.imageWrapper,!isLastInRow() && styles.spacing]} >
-      <Animated.Image style={[styles.image,getImageHeight()]} source={{uri: item?.webformatURL}}  />
+    <Pressable
+      onPress={() => {
+        // console.log('Navigating to Images screen', item);
+        navigation.push('ImagesScreen',{item});
+      }}
+      style={[styles.imageWrapper, !isLastInRow() && styles.spacing]}>
+      <Animated.Image
+        style={[styles.image, getImageHeight()]}
+        source={{uri: item?.webformatURL}}
+      />
     </Pressable>
   );
 };

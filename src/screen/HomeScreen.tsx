@@ -21,6 +21,9 @@ import FliterModel from '../components/FliterModel';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {ActivityIndicator} from 'react-native';
 
+
+
+
 var page = 1;
 export default function HomeScreen() {
   const [search, setSearch] = useState('');
@@ -28,12 +31,13 @@ export default function HomeScreen() {
   const [images, setImages] = useState<any[]>([]);
   const {top} = useSafeAreaInsets();
   const [filters, setFilters] = useState<Record<string, any>>({});
-  const scrollRef = useRef(null);
+  const scrollRef = useRef<ScrollView>(null);
   const [isEndReached, setIsEndReached] = useState(false);
 
   const paddingTop = top > 0 ? top + 10 : 30;
   const searchInputRef = useRef<TextInput>(null);
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
 
   const handleChangeCategory = (cat: any) => {
     setActiveCategory(cat);
@@ -277,9 +281,18 @@ export default function HomeScreen() {
                       // eslint-disable-next-line eqeqeq
                       key == 'color' ? (
                         // eslint-disable-next-line react-native/no-inline-styles
-                        <View style={{height:20,width:30,borderRadius:7,backgroundColor:filters[key]}} />
+                        <View
+                          style={{
+                            height: 20,
+                            width: 30,
+                            borderRadius: 7,
+                            backgroundColor: filters[key],
+                          }}
+                        />
                       ) : (
-                        <Text style={styles.filtersItemsText}>{filters[key]}</Text>
+                        <Text style={styles.filtersItemsText}>
+                          {filters[key]}
+                        </Text>
                       )
                     }
                     <Pressable
@@ -299,7 +312,11 @@ export default function HomeScreen() {
         )}
 
         {/* images masonary grid */}
-        <View>{images.length > 0 && <ImagesGrid images={images} />}</View>
+        <View>
+          {images.length > 0 && (
+            <ImagesGrid images={images} />
+          )}
+        </View>
 
         {/* Loading */}
         <View
