@@ -12,7 +12,9 @@ import ImagesScreen from '../screen/ImagesScreen';
 export type RootStackParamList = {
   Welcome: undefined;
   Home: undefined;
+  ImagesScreen: undefined;
 };
+
 
 const MainStack = createStackNavigator<RootStackParamList>();
 const ModalStack = createStackNavigator();

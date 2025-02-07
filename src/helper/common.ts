@@ -1,4 +1,5 @@
 import {Dimensions} from 'react-native';
+// import {PermissionsAndroid} from 'react-native';
 
 const { width: deviceWidth, height: deviceHeight } = Dimensions.get('window');
 
@@ -39,6 +40,8 @@ export const getImageSize = (height:number ,width:number) => {
     return 200;
   }
 };
+
+
 
 export const captalize = (str: any) => {
   return str.replace(/\b\w/g, (l:any) => l.toUpperCase());

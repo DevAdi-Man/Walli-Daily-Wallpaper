@@ -5,42 +5,40 @@ import {
   StyleSheet,
   ActivityIndicator,
   Pressable,
-  Alert,
+  // Alert,
 } from 'react-native';
-
+// import Permission from '../helper/Permission';
 import {BlurView} from '@react-native-community/blur';
-// import Button from '../components/Button';
 import {theme} from '../styles/theme';
 import {hp, wp} from '../helper/common';
 import Entypo from 'react-native-vector-icons/Entypo';
 import {useNavigation} from '@react-navigation/native';
 import Animated, {FadeInDown, FadeInRight} from 'react-native-reanimated';
 import RNFS from 'react-native-fs';
+import Share from 'react-native-share';
+import CustomToast, {showToast} from '../components/CustomeToast';
 
 const ImageScreen = ({route}: {route: any}) => {
-  const {item} = route.params; // Retrieve the item passed from ImagesCard
+  const {item} = route.params;
   const [status, setStatus] = useState('loading');
   const navigation = useNavigation();
 
   const fileName = item?.previewURL?.split('/').pop();
   let url = item?.webformatURL;
   const imageUrl = url;
-  console.log('imageUrl --> ', imageUrl);
 
-  const filePath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
-  console.log('filePath --> ', filePath);
-  console.log('fileName --> ', fileName);
+  const filePath = `${RNFS.PicturesDirectoryPath}/${fileName}`;
 
   const onLoad = () => {
     setStatus('');
   };
   const getSize = () => {
     if (!item?.imageWidth || !item?.imageHeight) {
-      return {width: wp(90), height: hp(50)}; // Default fallback size
+      return {width: wp(90), height: hp(50)};
     }
 
     const aspectRatio = item.imageWidth / item.imageHeight;
-    const maxWidth = wp(90); // 90% of the screen width
+    const maxWidth = wp(90);
     let calculatedHeight = maxWidth / aspectRatio;
 
     return {
@@ -50,47 +48,60 @@ const ImageScreen = ({route}: {route: any}) => {
   };
 
   const handleDownloadImage = async () => {
+
     setStatus('downloading');
-    await DownloadFile();
+    let uri = await DownloadFile();
+    if (uri) {
+      showToast('success', 'Image Downloaded Successfully');
+    } else {
+      showToast('error', 'Failed to Download Image');
+    }
+    setStatus('');
   };
-  const handleShareImage = () => {
+
+  const handleShareImage = async () => {
     setStatus('Sharing');
+    let uri = await DownloadFile();
+    if (uri) {
+      const option = {
+        url: `file://${uri}`,
+        type: 'image/jpeg',
+      };
+      await Share.open(option);
+      showToast('success', 'Image Shared Successfully');
+      setStatus('');
+    } else {
+      showToast('error', 'Failed to Share Image');
+    }
+    setStatus('');
   };
-  // console.log('uri : ', uri);
+
   const DownloadFile = async () => {
     try {
       const downloadOptions = {
-        fromUrl: imageUrl, // URL to download
-        toFile: filePath, // Path to save the file
+        fromUrl: imageUrl,
+        toFile: filePath,
       };
-      const result: any = await RNFS.downloadFile(downloadOptions).promise;
-      console.log('Download result: ', result); // Add this log
-      // Ensure we are correctly checking for 'path' property in result
-      if (result && result.statusCode === 200 && result.bytesWritten > 0) {
-        console.log('Download successful, file saved to:', filePath);
-        setStatus('downloaded');
-        return filePath; // Use the correct file path
+      const result = await RNFS.downloadFile(downloadOptions).promise;
+      if (result.statusCode === 200 && result.bytesWritten > 0) {
+        return filePath;
       } else {
-        throw new Error('Download failed with no valid path returned');
+        throw new Error('Download failed');
       }
-    } catch (error: any) {
+    } catch (error:any) {
       console.log('Download error: ', error.message);
-      setStatus('');
-      Alert.alert('Image : ', error.message);
       return null;
     }
   };
 
   return (
     <View style={styles.container}>
-      {/* Blur Entire Background */}
       <BlurView
         style={StyleSheet.absoluteFillObject}
         blurType="dark"
         blurAmount={7}
       />
 
-      {/* Image on Top of Blurred Background */}
       <Animated.View
         entering={FadeInRight.springify()}
         style={[getSize(), styles.imageContainer]}>
@@ -106,8 +117,6 @@ const ImageScreen = ({route}: {route: any}) => {
         />
       </Animated.View>
 
-      {/* Back Button */}
-      {/* <Button /> */}
       <View style={styles.buttons}>
         <Animated.View entering={FadeInDown.springify().delay(100)}>
           <Pressable
@@ -118,9 +127,7 @@ const ImageScreen = ({route}: {route: any}) => {
         </Animated.View>
         <Animated.View entering={FadeInDown.springify().delay(200)}>
           {status === 'downloading' ? (
-            <View>
-              <ActivityIndicator size={'small'} color={'white'} />
-            </View>
+            <ActivityIndicator size={'small'} color={'white'} />
           ) : (
             <Pressable
               style={styles.pressableButton}
@@ -131,9 +138,7 @@ const ImageScreen = ({route}: {route: any}) => {
         </Animated.View>
         <Animated.View entering={FadeInDown.springify().delay(300)}>
           {status === 'Sharing' ? (
-            <View>
-              <ActivityIndicator size={'small'} color={'white'} />
-            </View>
+            <ActivityIndicator size={'small'} color={'white'} />
           ) : (
             <Pressable
               style={styles.pressableButton}
@@ -143,6 +148,8 @@ const ImageScreen = ({route}: {route: any}) => {
           )}
         </Animated.View>
       </View>
+
+      <CustomToast />
     </View>
   );
 };
@@ -154,15 +161,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    // marginHorizontal: 2,
   },
   imageContainer: {
     marginBottom: 10,
-  },
-  image: {
-    width: '80%',
-    height: '60%',
-    borderRadius: 15,
   },
   images: {
     borderRadius: theme.radius.lg,
@@ -190,6 +191,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.2)',
     borderRadius: theme.radius.lg,
-    borderCurve: 'continuous',
   },
 });
