@@ -279,7 +279,7 @@ export default function HomeScreen() {
                   <View key={key} style={styles.filterItems}>
                     {
                       // eslint-disable-next-line eqeqeq
-                      key == 'color' ? (
+                      key === 'color' ? (
                         // eslint-disable-next-line react-native/no-inline-styles
                         <View
                           style={{
