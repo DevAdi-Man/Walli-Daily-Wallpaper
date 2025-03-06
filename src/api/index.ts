@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_Key = '48648142-7099311e9bd6a5c1a6609bdff';
+const API_Key = 'you-api-key';
 const apiUrl = `https://pixabay.com/api/?key=${API_Key}`;
 
 const formaltURL = (param:any) => {
