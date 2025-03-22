@@ -26,7 +26,7 @@ Walli is an open-source wallpaper app built with **React Native** and **TypeScri
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/Adityaraj002/Walli-Daily-Wallpaper.git
+   git clone https://github.com/DevAdi-Man/Walli-Daily-Wallpaper.git
    cd walli
    ```
 
